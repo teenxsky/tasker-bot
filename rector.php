@@ -41,6 +41,7 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/config',
         __DIR__ . '/database',
         __DIR__ . '/routes',
+        __DIR__ . '/tests',
     ]);
 
     $rectorConfig->skip([

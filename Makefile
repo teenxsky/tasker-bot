@@ -103,6 +103,7 @@ migrate: ## Применить миграции базы данных
 .PHONY: generate-app-key
 generate-app-key: ## Сгенерировать ключ приложения Laravel
 	@$(COMPOSE) exec app php artisan key:generate
+
 .PHONY: run-tests
-run-tests: ## Запустить все тесты приложения (php artisan test)
-	@$(COMPOSE) exec app php artisan test
+run-tests: $(file) ## Запустить все тесты приложения (php artisan test)
+	@$(COMPOSE) exec app php artisan test $(file)

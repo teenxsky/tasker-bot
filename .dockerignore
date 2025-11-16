@@ -20,6 +20,3 @@
 !storage/app/
 !storage/framework/
 !storage/logs/
-
-# Исключаем тесты
-app/**/*Test*/

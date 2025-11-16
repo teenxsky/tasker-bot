@@ -5,24 +5,20 @@
          colors="true"
 >
     <testsuites>
-        <!-- Controllers Tests -->
-        <testsuite name="Controllers">
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
         </testsuite>
-
-        <!-- AI Module Tests -->
-
-        <!-- Tasks Module Tests -->
-
-        <!-- TaskTracker Module Tests -->
-
-        <!-- Telegram Module Tests -->
-
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
     </testsuites>
+
     <source>
         <include>
-            <directory>app</directory>
+            <directory>./app</directory>
         </include>
     </source>
+
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
@@ -31,8 +27,6 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
 </phpunit>
