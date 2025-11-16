@@ -53,7 +53,7 @@ restart: ## Перезапустить контейнеры Docker
 
 .PHONY: composer-validate
 composer-validate: ## Проверка целостности зависимостей и корректности composer.json
-	@$(COMPOSE) exec app php composer.phar validate
+	@$(COMPOSE) exec app composer validate
 
 .PHONY: lint
 lint: ## Анализ кода с помощью PHPStan (поиск ошибок)
