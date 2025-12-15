@@ -1,20 +1,38 @@
 name: ${APP_NAME}
 
 services:
-  app:
+  nginx:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./docker/nginx/Dockerfile
+    ports:
+      - ${NGINX_EXTERNAL_PORT}:${NGINX_INTERNAL_PORT}
+    environment:
+      APP_HOST: ${APP_HOST}
+      APP_PORT: ${APP_INTERNAL_PORT}
+      NGINX_INTERNAL_PORT: ${NGINX_INTERNAL_PORT}
+    volumes:
+      - ./public:/var/www/public
+    depends_on:
+      - app
+
+  app:
+    hostname: ${APP_HOST}
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
       target: app-dev
     volumes:
       - ./:/app
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
+    expose:
+      - ${APP_INTERNAL_PORT}
+    environment:
+      APP_PORT: ${APP_INTERNAL_PORT}
     healthcheck:
       test: [ "CMD", "php", "-v" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
@@ -23,16 +41,15 @@ services:
     hostname: ${DB_HOST}
     build:
       context: .
-      dockerfile: ./Dockerfile
-      target: postgres
+      dockerfile: ./docker/postgres/Dockerfile
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       TZ: ${TZ:-Asia/Vladivostok}
-    command: -p ${DB_PORT:-5432}
+    command: -p ${DB_INTERNAL_PORT}
     ports:
-      - ${DB_PORT:-5432}:${DB_PORT:-5432}
+      - ${DB_EXTERNAL_PORT}:${DB_INTERNAL_PORT}
     volumes:
       - pg-data:/var/lib/postgresql/data
     healthcheck:
