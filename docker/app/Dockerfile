@@ -1,4 +1,4 @@
-ARG PHP_EXTS="pcntl pdo_pgsql pgsql zip"
+ARG PHP_EXTS="pcntl pdo_pgsql pgsql zip sockets"
 
 # BASE-IMAGES
 ############################################################################
@@ -72,3 +72,25 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # Скрипт для запуска prod приложения
 COPY docker/app/app.prod.sh /usr/local/bin/app.prod.sh
 RUN chmod +x /usr/local/bin/app.prod.sh
+
+CMD ["/usr/local/bin/app.prod.sh"]
+
+
+FROM base-app AS app-consumer
+WORKDIR /app
+
+# Копируем только prod-vendor
+COPY --from=prod-builder /tmp/vendor-prod ./vendor
+COPY --from=prod-builder /tmp/composer.* ./
+COPY . .
+
+# Включаем production php.ini
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# Установка супервизора
+RUN apk add --no-cache supervisor
+
+# Скрипт для запуска rabbitmq consumer
+COPY docker/app/supervisord-consumer.conf /etc/supervisord-consumer.conf
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord-consumer.conf"]
