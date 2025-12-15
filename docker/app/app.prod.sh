@@ -4,4 +4,7 @@ php /app/artisan key:generate --force
 php /app/artisan migrate --force
 php /app/artisan optimize
 
-php /app/artisan octane:swoole --max-requests=2000
+sed -i "s/9000/${APP_PORT}/g" /usr/local/etc/php-fpm.d/www.conf
+sed -i "s/9000/${APP_PORT}/g" /usr/local/etc/php-fpm.d/zz-docker.conf
+
+exec php-fpm
