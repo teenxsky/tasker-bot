@@ -1,4 +1,4 @@
-ARG PHP_EXTS="pcntl pdo_pgsql pgsql zip"
+ARG PHP_EXTS="pcntl pdo_pgsql pgsql zip sockets"
 
 # BASE-IMAGES
 ############################################################################
@@ -26,7 +26,7 @@ RUN apk add --no-cache \
 FROM base-app AS prod-builder
 
 ARG PHP_EXTS
-WORKDIR /app
+WORKDIR /var/www
 
 # deps для сборки расширений
 RUN apk add --no-cache --virtual .build-deps \
@@ -46,7 +46,7 @@ RUN composer install --no-scripts --no-dev -o \
 
 
 FROM base-app AS app-dev
-WORKDIR /app
+WORKDIR /var/www
 
 # Включаем нужные php.ini
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
@@ -59,7 +59,7 @@ ENTRYPOINT ["/usr/local/bin/app.dev.sh"]
 
 
 FROM base-app AS app-prod
-WORKDIR /app
+WORKDIR /var/www
 
 # Копируем только prod-vendor
 COPY --from=prod-builder /tmp/vendor-prod ./vendor
@@ -72,3 +72,5 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # Скрипт для запуска prod приложения
 COPY docker/app/app.prod.sh /usr/local/bin/app.prod.sh
 RUN chmod +x /usr/local/bin/app.prod.sh
+
+CMD ["/usr/local/bin/app.prod.sh"]
