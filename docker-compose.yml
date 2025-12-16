@@ -44,8 +44,6 @@ services:
       context: .
       dockerfile: ./docker/app/Dockerfile
       target: app-consumer
-    volumes:
-      - ./:/var/www
     healthcheck:
       test: [ "CMD", "php", "-v" ]
       interval: 10s
