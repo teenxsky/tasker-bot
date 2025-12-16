@@ -1,0 +1,62 @@
+name: ${APP_NAME}
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    ports:
+      - ${NGINX_EXTERNAL_PORT}:${NGINX_INTERNAL_PORT}
+    environment:
+      APP_HOST: ${APP_HOST}
+      APP_PORT: ${APP_INTERNAL_PORT}
+      NGINX_INTERNAL_PORT: ${NGINX_INTERNAL_PORT}
+    volumes:
+      - ./public:/var/www/public
+    depends_on:
+      - app
+
+  app:
+    hostname: ${APP_HOST}
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+      target: app-dev
+    volumes:
+      - ./:/var/www
+    expose:
+      - ${APP_INTERNAL_PORT}
+    environment:
+      APP_PORT: ${APP_INTERNAL_PORT}
+    healthcheck:
+      test: [ "CMD", "php", "-v" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    hostname: ${DB_HOST}
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ:-Asia/Vladivostok}
+    command: -p ${DB_INTERNAL_PORT}
+    ports:
+      - ${DB_EXTERNAL_PORT}:${DB_INTERNAL_PORT}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg-data:

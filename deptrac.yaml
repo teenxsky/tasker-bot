@@ -1,0 +1,98 @@
+deptrac:
+  paths:
+    - ./app
+  exclude_files:
+    - "#.*Test#"
+    - "#.*Tests#"
+  layers:
+    # Module layers
+    - name: Telegram
+      collectors:
+        - type: classLike
+          value: "^App\\\\Modules\\\\Telegram\\\\.*"
+    - name: Tasks
+      collectors:
+        - type: classLike
+          value: "^App\\\\Modules\\\\Tasks\\\\.*"
+    - name: AI
+      collectors:
+        - type: classLike
+          value: "^App\\\\Modules\\\\AI\\\\.*"
+    - name: TaskTracker
+      collectors:
+        - type: classLike
+          value: "^App\\\\Modules\\\\TaskTracker\\\\.*"
+
+    # Test layer
+    - name: Tests
+      collectors:
+        - type: classLike
+          value: ".*Test$|.*\\\\Tests\\\\.*"
+
+    # Core layers
+    - name: Framework
+      collectors:
+        - type: classLike
+          value: "^App\\\\Framework\\\\.*"
+    - name: Shared
+      collectors:
+        - type: classLike
+          value: "^App\\\\Shared\\\\.*"
+
+    # Controller layer
+    - name: Controller
+      collectors:
+        - type: classLike
+          value: "^App\\\\Controllers\\\\(?!.*Test)(?!.*\\\\Tests\\\\).*"
+
+  ruleset:
+    # Module dependencies
+    # Telegram - точка входа, зависит только от Tasks и Shared/Framework
+    Telegram:
+      - Shared
+      - Framework
+      - Tasks
+
+    # Tasks - координатор, может зависеть от всех модулей кроме Telegram
+    Tasks:
+      - Shared
+      - Framework
+      - AI
+      - TaskTracker
+
+    # AI - изолированный модуль, только Shared/Framework
+    AI:
+      - Shared
+      - Framework
+
+    # TaskTracker - изолированный модуль, только Shared/Framework
+    TaskTracker:
+      - Shared
+      - Framework
+
+    # Test dependencies - могут зависеть от всего
+    Tests:
+      - Shared
+      - Framework
+      - Telegram
+      - Tasks
+      - AI
+      - TaskTracker
+      - Controller
+
+    # Controller dependencies - может зависеть от модулей
+    Controller:
+      - Shared
+      - Framework
+      - Telegram
+      - Tasks
+      - AI
+      - TaskTracker
+
+    # Core layers
+    Shared:
+      - Shared
+      - Framework
+
+    Framework:
+      - Shared
