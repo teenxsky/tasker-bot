@@ -23,7 +23,7 @@ services:
       dockerfile: ./docker/app/Dockerfile
       target: app-dev
     volumes:
-      - ./:/app
+      - ./:/var/www
     expose:
       - ${APP_INTERNAL_PORT}
     environment:
