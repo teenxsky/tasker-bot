@@ -56,8 +56,14 @@ app/
    Эта команда автоматически:
     - Соберёт Docker-образы
     - Применит миграции базы данных
-    - Установит Telegram Webhook
     - Запустит приложение
+
+5. **Установка Telegram Webhook**
+    ```bash
+    make set-webhook
+    # или
+    make set-webhook --url=<ссылка на webhook endpoint>
+    ```
 
 ### Команды для разработки
 

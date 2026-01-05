@@ -14,7 +14,6 @@ help:
 init:
 	@$(MAKE) build
 	@$(MAKE) migrate
-	@$(MAKE) set-webhook
 
 
 #--------------- ОСНОВНЫЕ КОМАНДЫ ---------------#
