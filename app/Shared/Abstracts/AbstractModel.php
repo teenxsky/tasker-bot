@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Abstracts;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,6 +16,4 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class AbstractModel extends Model
 {
-    /** @use HasFactory<Factory<T>> */
-    use HasFactory;
 }
