@@ -14,26 +14,27 @@ use App\Modules\Tasks\Interfaces\Services\TaskBoardResolverInterface;
 use App\Modules\Tasks\Interfaces\Services\TaskExecutionResultServiceInterface;
 use App\Modules\Tasks\Interfaces\Services\TaskServiceInterface;
 use App\Modules\Tasks\Interfaces\UseCases\ProcessTaskUseCaseInterface;
+use App\Modules\TaskTracker\DTO\CreateCardRequestDTO;
+use App\Modules\TaskTracker\Interfaces\Services\TaskTrackerServiceInterface;
 use Throwable;
 
 /**
  * UseCase для обработки задачи через ИИ и создания в трекере
- *
- * TODO: реализовать сервисы ИИ/таск-трекера.
  */
 final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
 {
     public function __construct(
         private TaskServiceInterface                $taskService,
         private TaskExecutionResultServiceInterface $executionResultService,
-        private TaskBoardResolverInterface          $boardResolver
+        private TaskTrackerServiceInterface         $taskTrackerService,
+        private TaskBoardResolverInterface          $boardResolver,
     ) {
     }
 
     public function execute(int $taskId): void
     {
-        // Получаем задачу
         $taskDTO = $this->taskService->getTaskById($taskId);
+
         if (!$taskDTO instanceof TaskDTO) {
             throw new TaskNotFoundException($taskId);
         }
@@ -42,8 +43,8 @@ final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
             throw new TaskProcessingException('ID задачи не может быть нулевым');
         }
 
-        // Получаем результат выполнения
         $executionResultDTO = $this->executionResultService->getExecutionResultByTaskId($taskId);
+
         if (!$executionResultDTO instanceof TaskExecutionResultDTO) {
             throw new TaskProcessingException('Результат выполнения не найден для задачи ' . $taskId);
         }
@@ -64,14 +65,27 @@ final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
                 'tags'                => [],
             ];
 
-            // TODO: сохранить обработанные ИИ данные
+            // Сохраняем обработанные ИИ данные
             $this->executionResultService->updateAiProcessedData(
                 resultId: $executionResultDTO->id,
                 data: $aiProcessedData
             );
 
-            // TODO: создать задачу в трекере
-            $taskTrackerUrl = 'https://example.com/task/123'; // Заглушка
+            // Создаём задачу в таск-трекере
+            $boardId = $this->boardResolver->resolveBoardId($taskId);
+
+            $createCardRequestDTO = new CreateCardRequestDTO(
+                title: $aiProcessedData['title'],
+                description: $aiProcessedData['description'],
+                userEmail: $taskDTO->userEmail,
+                ownerEmail: $taskDTO->ownerEmail,
+                processedData: $aiProcessedData
+            );
+
+            $taskTrackerUrl = $this->taskTrackerService->createTask(
+                request: $createCardRequestDTO,
+                boardId: $boardId
+            );
 
             // Обновляем URL в задаче
             $this->taskService->updateTaskTrackerUrl(
