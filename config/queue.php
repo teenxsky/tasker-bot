@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+
 return [
 
     /*
@@ -26,8 +28,7 @@ return [
     | used by your application. An example configuration is provided for
     | each backend supported by Laravel. You're also free to add more.
     |
-    | Drivers: "sync", "database", "beanstalkd", "sqs", "redis",
-    |          "deferred", "background", "failover", "null"
+    | Drivers: "sync", "database", "beanstalkd", "sqs", "redis", "null"
     |
     */
 
@@ -42,7 +43,7 @@ return [
             'connection'   => env('DB_QUEUE_CONNECTION'),
             'table'        => env('DB_QUEUE_TABLE', 'jobs'),
             'queue'        => env('DB_QUEUE', 'default'),
-            'retry_after'  => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            'retry_after'  => (int)env('DB_QUEUE_RETRY_AFTER', 90),
             'after_commit' => false,
         ],
 
@@ -50,7 +51,7 @@ return [
             'driver'       => 'beanstalkd',
             'host'         => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
             'queue'        => env('BEANSTALKD_QUEUE', 'default'),
-            'retry_after'  => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
+            'retry_after'  => (int)env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
             'block_for'    => 0,
             'after_commit' => false,
         ],
@@ -70,25 +71,40 @@ return [
             'driver'       => 'redis',
             'connection'   => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue'        => env('REDIS_QUEUE', 'default'),
-            'retry_after'  => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
+            'retry_after'  => (int)env('REDIS_QUEUE_RETRY_AFTER', 90),
             'block_for'    => null,
             'after_commit' => false,
         ],
 
-        'deferred' => [
-            'driver' => 'deferred',
-        ],
-
-        'background' => [
-            'driver' => 'background',
-        ],
-
-        'failover' => [
-            'driver'      => 'failover',
-            'connections' => [
-                'database',
-                'deferred',
+        'rabbitmq' => [
+            'queue'      => env('RABBITMQ_JOBS_QUEUE', 'default'),
+            'timeout'    => (int)env('RABBITMQ_JOBS_TIMEOUT', 60),
+            'connection' => PhpAmqpLib\Connection\AMQPStreamConnection::class,
+            'driver'     => 'rabbitmq',
+            'hosts'      => [
+                [
+                    'host'     => env('RABBITMQ_HOST', '127.0.0.1'),
+                    'port'     => env('RABBITMQ_INTERNAL_PORT', 5672),
+                    'user'     => env('RABBITMQ_USER', 'guest'),
+                    'password' => env('RABBITMQ_PASSWORD', 'guest'),
+                    'vhost'    => env('RABBITMQ_VHOST', '/'),
+                ],
             ],
+            'options' => [
+                'ssl_options' => [
+                    'cafile'      => env('RABBITMQ_SSL_CAFILE'),
+                    'local_cert'  => env('RABBITMQ_SSL_LOCALCERT'),
+                    'local_key'   => env('RABBITMQ_SSL_LOCALKEY'),
+                    'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                    'passphrase'  => env('RABBITMQ_SSL_PASSPHRASE'),
+                ],
+                'heartbeat'           => 60,
+                'connection_timeout'  => 10.0,
+                'read_write_timeout'  => 10.0,
+                'persistent'          => true,
+                'automatic_reconnect' => true,
+            ],
+            'worker' => RabbitMQQueue::class,
         ],
 
     ],

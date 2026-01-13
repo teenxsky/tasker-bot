@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/health',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(\App\Framework\Http\Middlewares\AccessLogMiddleware::class);
+        //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

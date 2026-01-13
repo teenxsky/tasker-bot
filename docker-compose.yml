@@ -36,6 +36,24 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  app-consumer:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+      target: app-consumer
+    healthcheck:
+      test: [ "CMD", "php", "-v" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      app:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   postgres:
     hostname: ${DB_HOST}
@@ -58,5 +76,30 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: ./docker/rabbitmq/Dockerfile
+      target: rabbitmq
+    container_name: ${RABBITMQ_HOST}
+    ports:
+      - ${RABBITMQ_EXTERNAL_PORT}:${RABBITMQ_INTERNAL_PORT}
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST}
+      RABBITMQ_JOBS_QUEUE: ${RABBITMQ_JOBS_QUEUE}
+      RABBITMQ_INTERNAL_PORT: ${RABBITMQ_INTERNAL_PORT}
+      TZ: ${TZ:-Asia/Vladivostok}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pg-data:
+  rabbitmq-data:

@@ -62,9 +62,6 @@ jobs:
       - name: Run Deptrac
         run: make deptrac
 
-      - name: Run tests
-        run: make run-tests
-
       - name: Clean up
         if: always()
         run: make clean

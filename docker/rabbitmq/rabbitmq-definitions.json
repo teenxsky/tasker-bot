@@ -1,0 +1,33 @@
+{
+  "rabbit_version": "4.1.2",
+  "users": [
+    {
+      "name": "${RABBITMQ_USER}",
+      "password": "${RABBITMQ_PASSWORD}",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "${RABBITMQ_VHOST}"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "${RABBITMQ_USER}",
+      "vhost": "${RABBITMQ_VHOST}",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "queues": [
+    {
+      "name": "${RABBITMQ_JOBS_QUEUE}",
+      "vhost": "${RABBITMQ_VHOST}",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ]
+}

@@ -14,8 +14,6 @@ help:
 init:
 	@$(MAKE) build
 	@$(MAKE) migrate
-	@$(MAKE) restart
-	@$(MAKE) up
 
 
 #--------------- ОСНОВНЫЕ КОМАНДЫ ---------------#
@@ -91,10 +89,6 @@ install-dependencies: ## Установить зависимости Laravel (co
 .PHONY: app-shell
 app-shell: ## Открыть оболочку контейнера приложения
 	@$(COMPOSE) exec app sh
-
-.PHONY: make-migration
-make-migration: ## Создать новую миграцию
-	@$(COMPOSE) exec app php artisan make:migration
 
 .PHONY: migrate
 migrate: ## Применить миграции базы данных
