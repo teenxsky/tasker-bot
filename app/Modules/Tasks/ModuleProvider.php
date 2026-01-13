@@ -8,12 +8,14 @@ use App\Modules\Tasks\Interfaces\Repositories\TaskExecutionResultRepositoryInter
 use App\Modules\Tasks\Interfaces\Repositories\TaskRepositoryInterface;
 use App\Modules\Tasks\Interfaces\Services\TaskExecutionResultServiceInterface;
 use App\Modules\Tasks\Interfaces\Services\TaskServiceInterface;
+use App\Modules\Tasks\Interfaces\Services\TaskTrackerDataServiceInterface;
 use App\Modules\Tasks\Interfaces\UseCases\CreateTaskUseCaseInterface;
 use App\Modules\Tasks\Interfaces\UseCases\ProcessTaskUseCaseInterface;
 use App\Modules\Tasks\Repositories\TaskExecutionResultRepository;
 use App\Modules\Tasks\Repositories\TaskRepository;
 use App\Modules\Tasks\Services\TaskExecutionResultService;
 use App\Modules\Tasks\Services\TaskService;
+use App\Modules\Tasks\Services\TaskTrackerDataService;
 use App\Modules\Tasks\UseCases\CreateTaskUseCase;
 use App\Modules\Tasks\UseCases\ProcessTaskUseCase;
 use App\Shared\Abstracts\AbstractModuleProvider;
@@ -43,6 +45,11 @@ final class ModuleProvider extends AbstractModuleProvider
         $this->app->bind(
             TaskExecutionResultServiceInterface::class,
             TaskExecutionResultService::class
+        );
+
+        $this->app->bind(
+            TaskTrackerDataServiceInterface::class,
+            TaskTrackerDataService::class
         );
     }
 
