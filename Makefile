@@ -101,3 +101,7 @@ generate-app-key: ## Сгенерировать ключ приложения La
 .PHONY: run-tests
 run-tests: $(file) ## Запустить все тесты приложения (php artisan test)
 	@$(COMPOSE) exec app php artisan test $(file)
+
+.PHONY: set-webhook
+set-webhook: ## Установить webhook для Telegram API
+	@$(COMPOSE) exec app php artisan telegram:set-webhook

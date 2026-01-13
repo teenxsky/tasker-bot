@@ -1,4 +1,4 @@
-ARG PHP_EXTS="pcntl pdo_pgsql pgsql zip sockets"
+ARG PHP_EXTS="pcntl pdo_pgsql pgsql zip sockets redis"
 
 # BASE-IMAGES
 ############################################################################

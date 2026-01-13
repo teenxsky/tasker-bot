@@ -36,9 +36,19 @@ app/
 
 2. **Заполнение переменных окружения**
 
-   Отредактируйте `.env` и заполните.
+   Отредактируйте `.env` и заполните:
+   - KAITEN_API_URL
+   - KAITEN_API_TOKEN
+   - OPEN_ROUTER_AI_API_KEY
+   - TELEGRAM_BOT_TOKEN
+   - TELEGRAM_WEBHOOK_URL
 
-3. **Инициализация проекта**
+3. **Установка зависимостей**
+    ```bash
+    composer install
+    ```
+
+4. **Инициализация проекта**
     ```bash
     make init
     ```
@@ -46,8 +56,14 @@ app/
    Эта команда автоматически:
     - Соберёт Docker-образы
     - Применит миграции базы данных
-    - Перезапустит контейнеры
     - Запустит приложение
+
+5. **Установка Telegram Webhook**
+    ```bash
+    make set-webhook
+    # или
+    make set-webhook --url=<ссылка на webhook endpoint>
+    ```
 
 ### Команды для разработки
 

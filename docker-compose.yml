@@ -44,6 +44,8 @@ services:
       context: .
       dockerfile: ./docker/app/Dockerfile
       target: app-consumer
+    volumes:
+      - ./:/var/www
     healthcheck:
       test: [ "CMD", "php", "-v" ]
       interval: 10s
@@ -76,6 +78,26 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    build:
+      context: .
+      dockerfile: ./docker/redis/Dockerfile
+      target: redis
+    container_name: ${REDIS_HOST}
+    ports:
+      - ${REDIS_PORT}:6379
+    environment:
+      TZ: ${TZ:-Asia/Vladivostok}
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     build:
       context: .
@@ -102,4 +124,5 @@ services:
 
 volumes:
   pg-data:
+  redis-data:
   rabbitmq-data:
