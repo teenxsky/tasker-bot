@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Tasks\UseCases;
 
+use App\Modules\AI\DTO\ProcessedTaskDataDTO;
+use App\Modules\AI\DTO\TaskDescriptionDTO;
+use App\Modules\AI\Interfaces\UseCases\ProcessTaskDescriptionUseCaseInterface;
 use App\Modules\Tasks\DTO\TaskDTO;
 use App\Modules\Tasks\DTO\TaskExecutionResultDTO;
 use App\Modules\Tasks\Enums\TaskStatusEnum;
@@ -24,10 +27,11 @@ use Throwable;
 final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
 {
     public function __construct(
-        private TaskServiceInterface                $taskService,
-        private TaskExecutionResultServiceInterface $executionResultService,
-        private TaskTrackerServiceInterface         $taskTrackerService,
-        private TaskBoardResolverInterface          $boardResolver,
+        private TaskServiceInterface                   $taskService,
+        private TaskExecutionResultServiceInterface    $executionResultService,
+        private TaskTrackerServiceInterface            $taskTrackerService,
+        private TaskBoardResolverInterface             $boardResolver,
+        private ProcessTaskDescriptionUseCaseInterface $processTaskDescriptionUseCase,
     ) {
     }
 
@@ -54,15 +58,23 @@ final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
         }
 
         try {
-            // TODO: здесь будет обработка через ИИ
+            // Обрабатываем описание задачи через ИИ агента
+            $taskDescriptionDTO = new TaskDescriptionDTO(
+                description: $taskDTO->description,
+                userEmail: $taskDTO->userEmail
+            );
+
+            $processedTaskData = $this->processTaskDescriptionUseCase->execute($taskDescriptionDTO);
+
+            // Преобразуем ProcessedTaskDataDTO в массив для сохранения
             $aiProcessedData = [
-                'title'               => 'Заглушка: заголовок задачи',
-                'description'         => 'Заглушка: описание задачи',
-                'acceptance_criteria' => 'Заглушка: критерии приемки',
-                'technical_notes'     => 'Заглушка: технические заметки',
-                'estimated_time'      => 0,
-                'priority'            => 'medium',
-                'tags'                => [],
+                'title'               => $processedTaskData->title,
+                'description'         => $processedTaskData->description,
+                'acceptance_criteria' => $processedTaskData->acceptanceCriteria,
+                'technical_notes'     => $processedTaskData->technicalNotes,
+                'estimated_time'      => $processedTaskData->estimatedTime,
+                'priority'            => $processedTaskData->priority,
+                'tags'                => $processedTaskData->tags,
             ];
 
             // Сохраняем обработанные ИИ данные
@@ -75,8 +87,8 @@ final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
             $boardId = $this->boardResolver->resolveBoardId($taskId);
 
             $createCardRequestDTO = new CreateCardRequestDTO(
-                title: $aiProcessedData['title'],
-                description: $aiProcessedData['description'],
+                title: $processedTaskData->title,
+                description: $this->buildTaskTrackerDescription($processedTaskData),
                 userEmail: $taskDTO->userEmail,
                 ownerEmail: $taskDTO->ownerEmail,
                 processedData: $aiProcessedData
@@ -124,5 +136,46 @@ final readonly class ProcessTaskUseCase implements ProcessTaskUseCaseInterface
 
             throw new TaskProcessingException($throwable->getMessage());
         }
+    }
+
+    /**
+     * Формирование описания задачи для таск-трекера
+     */
+    private function buildTaskTrackerDescription(ProcessedTaskDataDTO $processedData): string
+    {
+        $parts = [];
+
+        // Основное описание
+        $parts[] = '## Описание';
+        $parts[] = $processedData->description;
+        $parts[] = '';
+
+        // Критерии приемки
+        $parts[] = '## Критерии приемки';
+        $parts[] = $processedData->acceptanceCriteria;
+        $parts[] = '';
+
+        // Технические заметки (если есть)
+        if ($processedData->technicalNotes !== null) {
+            $parts[] = '## Технические заметки';
+            $parts[] = $processedData->technicalNotes;
+            $parts[] = '';
+        }
+
+        // Метаданные
+        $metadata = [];
+        if ($processedData->estimatedTime !== null) {
+            $metadata[] = '**Оценка времени:** ' . $processedData->estimatedTime . ' ч';
+        }
+
+        $metadata[] = '**Приоритет:** ' . $processedData->priority;
+        if ($processedData->tags !== []) {
+            $metadata[] = '**Теги:** ' . implode(', ', $processedData->tags);
+        }
+
+        $parts[] = '---';
+        $parts[] = implode(' | ', $metadata);
+
+        return implode("\n", $parts);
     }
 }

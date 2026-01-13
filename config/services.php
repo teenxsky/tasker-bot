@@ -22,4 +22,12 @@ return [
         'timeout'   => (int)env('KAITEN_API_TIMEOUT', 30),
     ],
 
+    'openrouter' => [
+        'api_key'     => env('OPEN_ROUTER_AI_API_KEY'),
+        'api_url'     => env('OPEN_ROUTER_AI_API_URL', 'https://openrouter.ai/api/v1'),
+        'model'       => env('OPEN_ROUTER_AI_MODEL', 'deepseek/deepseek-chat'),
+        'temperature' => (float)env('OPEN_ROUTER_AI_TEMPERATURE', 0.2),
+        'timeout'     => (int)env('OPEN_ROUTER_AI_TIMEOUT', 60),
+    ],
+
 ];

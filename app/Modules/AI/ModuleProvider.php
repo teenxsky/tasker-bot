@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\AI;
 
+use App\Modules\AI\Interfaces\Services\OpenRouterApiServiceInterface;
+use App\Modules\AI\Interfaces\UseCases\ProcessTaskDescriptionUseCaseInterface;
+use App\Modules\AI\Services\OpenRouterApiService;
+use App\Modules\AI\UseCases\ProcessTaskDescriptionUseCase;
 use App\Shared\Abstracts\AbstractModuleProvider;
 
 final class ModuleProvider extends AbstractModuleProvider
@@ -15,11 +19,17 @@ final class ModuleProvider extends AbstractModuleProvider
 
     protected function registerServices(): void
     {
-        // TODO: Implement registerServices() method.
+        $this->app->singleton(
+            OpenRouterApiServiceInterface::class,
+            OpenRouterApiService::class
+        );
     }
 
     protected function registerUseCases(): void
     {
-        // TODO: Implement registerUseCases() method.
+        $this->app->bind(
+            ProcessTaskDescriptionUseCaseInterface::class,
+            ProcessTaskDescriptionUseCase::class
+        );
     }
 }
